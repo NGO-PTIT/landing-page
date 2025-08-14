@@ -18,7 +18,13 @@ const PRODUCTS = [
     name: 'iPhone 15 Pro',
     price: 28990000,
     category: 'Điện thoại',
-    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=600&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=600&auto=format&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1556656793-08538906a9f8?q=80&w=600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=600&auto=format&fit=crop'
+    ],
+    description: 'iPhone 15 Pro với hiệu năng mạnh mẽ, thiết kế viền mỏng và camera cải tiến.'
   },
   {
     id: 2,
@@ -47,7 +53,14 @@ const PRODUCTS = [
     name: 'MacBook Air M2 13"',
     price: 26990000,
     category: 'Laptop',
-    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=600&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=600&auto=format&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1517059224940-d4af9eec41e5?q=80&w=600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=600&auto=format&fit=crop'
+    ],
+    video: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+    description: 'Mỏng nhẹ, pin bền, chip Apple M2 hiệu năng cao.'
   },
   {
     id: 6,
@@ -76,7 +89,12 @@ const PRODUCTS = [
     name: 'Tai nghe Bluetooth',
     price: 790000,
     category: 'Phụ kiện',
-    image: 'https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?q=80&w=600&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?q=80&w=600&auto=format&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1518441936079-1b59f1b1c6b6?q=80&w=600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1524678714210-9917a6c619c2?q=80&w=600&auto=format&fit=crop'
+    ],
+    description: 'Âm thanh sống động, kết nối ổn định, thời lượng pin dài.'
   },
   {
     id: 10,
@@ -118,6 +136,7 @@ function App() {
   const [category, setCategory] = useState('Tất cả')
   const [page, setPage] = useState(1)
   const pageSize = 8
+  const [mediaIndex, setMediaIndex] = useState(0)
 
   const subtotal = selectedProduct ? selectedProduct.price * quantity : 0
   const productsToShow = PRODUCTS.filter(p => category === 'Tất cả' || p.category === category)
@@ -130,6 +149,12 @@ function App() {
     setQuantity(1)
     setCustomer({ name: '', phone: '', email: '', address: '' })
     setStep('form')
+  }
+
+  function openDetail(product) {
+    setSelectedProduct(product)
+    setMediaIndex(0)
+    setStep('detail')
   }
 
   async function handleSubmit(e) {
@@ -219,7 +244,7 @@ function App() {
           </div>
           <div className="product-grid">
             {pagedProducts.map((p) => (
-              <div key={p.id} className="product-card" onClick={() => openForm(p)}>
+              <div key={p.id} className="product-card" onClick={() => openDetail(p)}>
                 <div className="product-media">
                   <img src={p.image} alt={p.name} loading="lazy" />
                 </div>
@@ -229,7 +254,7 @@ function App() {
                     <span className="product-price">{currencyVND(p.price)}</span>
                     <button
                       className="buy-btn"
-                      onClick={(e) => {
+                       onClick={(e) => {
                         e.stopPropagation()
                         openForm(p)
                       }}
@@ -365,8 +390,13 @@ function App() {
         </section>
 
         {step !== 'products' && (
-          <div className="modal-overlay" onClick={reset}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-overlay"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) reset()
+            }}
+          >
+            <div className="modal" onMouseDown={(e) => e.stopPropagation()}>
               <button className="close-btn" onClick={reset}>
                 ×
               </button>
@@ -439,6 +469,61 @@ function App() {
                     </div>
                   </form>
                 </>
+              )}
+
+              {step === 'detail' && selectedProduct && (
+                <div className="product-detail">
+                  {(() => {
+                    const images = Array.isArray(selectedProduct.images) && selectedProduct.images.length > 0
+                      ? selectedProduct.images
+                      : [selectedProduct.image]
+                    const media = (selectedProduct.video ? [{ type: 'video', src: selectedProduct.video }] : [])
+                      .concat(images.map(src => ({ type: 'image', src })))
+                    const active = media[Math.min(mediaIndex, media.length - 1)]
+                    return (
+                      <>
+                        <div className="detail-media">
+                          <div className="main-media">
+                            {active?.type === 'video' ? (
+                              <video controls playsInline src={active.src} />
+                            ) : (
+                              <img src={active?.src} alt={selectedProduct.name} loading="lazy" />
+                            )}
+                          </div>
+                          <div className="thumbs">
+                            {media.map((m, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                className={`thumb ${idx === Math.min(mediaIndex, media.length - 1) ? 'active' : ''}`}
+                                onClick={() => setMediaIndex(idx)}
+                                aria-pressed={idx === Math.min(mediaIndex, media.length - 1)}
+                              >
+                                {m.type === 'video' ? (
+                                  <span className="thumb-video">▶</span>
+                                ) : (
+                                  <img src={m.src} alt={`thumb-${idx}`} loading="lazy" />
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="detail-info">
+                          <h3 className="detail-title">{selectedProduct.name}</h3>
+                          <div className="detail-price">{currencyVND(selectedProduct.price)}</div>
+                          {selectedProduct.category && (
+                            <div className="detail-cat">{selectedProduct.category}</div>
+                          )}
+                          <p className="detail-desc">{selectedProduct.description || 'Sản phẩm chính hãng, bảo hành 12 tháng, đổi trả trong 7 ngày.'}</p>
+                          <div className="detail-actions">
+                            <button className="btn primary" onClick={() => setStep('form')}>Mua ngay</button>
+                            <button className="btn" onClick={() => setStep('products')}>Đóng</button>
+                          </div>
+                        </div>
+                      </>
+                    )
+                  })()}
+                </div>
               )}
 
               {step === 'invoice' && selectedProduct && (
