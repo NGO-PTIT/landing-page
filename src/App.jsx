@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createOrder } from './api/orders'
 import './App.css'
 
 const SHOP = {
@@ -11,31 +12,96 @@ const SHOP = {
 }
 
 const PRODUCTS = [
+  // Điện thoại
   {
     id: 1,
-    name: 'Sản phẩm A',
-    price: 120000,
-    image: 'https://images.unsplash.com/photo-1526178618718-537bf555f0b0?q=80&w=600&auto=format&fit=crop'
+    name: 'iPhone 15 Pro',
+    price: 28990000,
+    category: 'Điện thoại',
+    image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 2,
-    name: 'Sản phẩm B',
-    price: 230000,
-    image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=600&auto=format&fit=crop'
+    name: 'Samsung Galaxy S23',
+    price: 19990000,
+    category: 'Điện thoại',
+    image: 'https://images.unsplash.com/photo-1529612700005-e35377bf1415?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 3,
-    name: 'Sản phẩm C',
-    price: 99000,
-    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=600&auto=format&fit=crop'
+    name: 'Xiaomi Redmi 12',
+    price: 4990000,
+    category: 'Điện thoại',
+    image: 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?q=80&w=600&auto=format&fit=crop'
   },
   {
     id: 4,
-    name: 'Sản phẩm D',
-    price: 450000,
-    image: 'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?q=80&w=600&auto=format&fit=crop'
+    name: 'OPPO Reno10',
+    price: 10990000,
+    category: 'Điện thoại',
+    image: 'https://images.unsplash.com/photo-1512499617640-c74ae6e8b9a1?q=80&w=600&auto=format&fit=crop'
+  },
+  // Laptop
+  {
+    id: 5,
+    name: 'MacBook Air M2 13"',
+    price: 26990000,
+    category: 'Laptop',
+    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 6,
+    name: 'ASUS TUF Gaming F15',
+    price: 18990000,
+    category: 'Laptop',
+    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 7,
+    name: 'Dell XPS 13',
+    price: 32990000,
+    category: 'Laptop',
+    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 8,
+    name: 'Lenovo ThinkPad X1 Carbon',
+    price: 39990000,
+    category: 'Laptop',
+    image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=600&auto=format&fit=crop'
+  },
+  // Phụ kiện
+  {
+    id: 9,
+    name: 'Tai nghe Bluetooth',
+    price: 790000,
+    category: 'Phụ kiện',
+    image: 'https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 10,
+    name: 'Sạc nhanh 65W',
+    price: 490000,
+    category: 'Phụ kiện',
+    image: 'https://images.unsplash.com/photo-1588702547923-7093a6c3ba33?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 11,
+    name: 'Chuột không dây',
+    price: 350000,
+    category: 'Phụ kiện',
+    image: 'https://images.unsplash.com/photo-1585079542156-2755d9c8affd?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    id: 12,
+    name: 'Bàn phím cơ',
+    price: 1590000,
+    category: 'Phụ kiện',
+    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=600&auto=format&fit=crop'
   }
 ]
+
+const CATEGORIES = ['Tất cả', ...Array.from(new Set(PRODUCTS.map(p => p.category)))]
 
 function currencyVND(n) {
   return n.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
@@ -46,8 +112,18 @@ function App() {
   const [quantity, setQuantity] = useState(1)
   const [customer, setCustomer] = useState({ name: '', phone: '', email: '', address: '' })
   const [step, setStep] = useState('products')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [orderId, setOrderId] = useState('')
+  const [submitError, setSubmitError] = useState('')
+  const [category, setCategory] = useState('Tất cả')
+  const [page, setPage] = useState(1)
+  const pageSize = 8
 
   const subtotal = selectedProduct ? selectedProduct.price * quantity : 0
+  const productsToShow = PRODUCTS.filter(p => category === 'Tất cả' || p.category === category)
+  const totalPages = Math.max(1, Math.ceil(productsToShow.length / pageSize))
+  const currentPage = Math.min(page, totalPages)
+  const pagedProducts = productsToShow.slice((currentPage - 1) * pageSize, currentPage * pageSize)
 
   function openForm(product) {
     setSelectedProduct(product)
@@ -56,9 +132,33 @@ function App() {
     setStep('form')
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    setStep('invoice')
+    setSubmitError('')
+    setIsSubmitting(true)
+    try {
+      const order = {
+        items: [
+          {
+            productId: selectedProduct.id,
+            productName: selectedProduct.name,
+            unitPrice: selectedProduct.price,
+            quantity,
+          },
+        ],
+        total: subtotal,
+        contact: customer,
+      }
+      const ref = await createOrder(order)
+      setOrderId(ref.id)
+      setStep('invoice')
+    } catch (err) {
+      console.error('Create order error:', err)
+      const message = err && err.message ? err.message : 'Lưu đơn hàng thất bại. Vui lòng thử lại.'
+      setSubmitError(message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   function reset() {
@@ -66,6 +166,8 @@ function App() {
     setQuantity(1)
     setCustomer({ name: '', phone: '', email: '', address: '' })
     setStep('products')
+    setOrderId('')
+    setSubmitError('')
   }
 
   return (
@@ -102,8 +204,21 @@ function App() {
       <main>
         <section id="products" className="section">
           <h2>Sản phẩm nổi bật</h2>
+          <div className="category-tabs">
+            {CATEGORIES.map((c) => (
+              <button
+                key={c}
+                type="button"
+                className={`tab ${category === c ? 'active' : ''}`}
+                onClick={() => { setCategory(c); setPage(1) }}
+                aria-pressed={category === c}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
           <div className="product-grid">
-            {PRODUCTS.map((p) => (
+            {pagedProducts.map((p) => (
               <div key={p.id} className="product-card" onClick={() => openForm(p)}>
                 <div className="product-media">
                   <img src={p.image} alt={p.name} loading="lazy" />
@@ -125,6 +240,37 @@ function App() {
                 </div>
               </div>
             ))}
+          </div>
+          <div className="pagination">
+            <button
+              type="button"
+              className="page-btn"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              aria-label="Trang trước"
+            >
+              Trước
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+              <button
+                key={n}
+                type="button"
+                className={`page-btn ${currentPage === n ? 'active' : ''}`}
+                onClick={() => setPage(n)}
+                aria-current={currentPage === n ? 'page' : undefined}
+              >
+                {n}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="page-btn"
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              aria-label="Trang sau"
+            >
+              Sau
+            </button>
           </div>
         </section>
 
@@ -281,12 +427,15 @@ function App() {
                       <span>Tạm tính</span>
                       <span>{currencyVND(subtotal)}</span>
                     </div>
+                    {submitError && (
+                      <div style={{ color: 'red', fontSize: 12 }}>{submitError}</div>
+                    )}
 
                     <div className="actions">
                       <button type="button" onClick={reset} className="secondary">
                         Hủy
                       </button>
-                      <button type="submit">Xuất hóa đơn</button>
+                      <button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Đang lưu...' : 'Xuất hóa đơn'}</button>
                     </div>
                   </form>
                 </>
@@ -326,7 +475,7 @@ function App() {
                           <strong>Ngày:</strong> {new Date().toLocaleDateString('vi-VN')}
                         </div>
                         <div>
-                          <strong>Mã đơn:</strong> {Date.now()}
+                          <strong>Mã đơn:</strong> {orderId || Date.now()}
                         </div>
                       </div>
                     </div>
