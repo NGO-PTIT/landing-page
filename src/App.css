@@ -111,8 +111,11 @@
   overflow: hidden;
 }
 .product-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.product-price { color: var(--price-color); }
-.buy-btn { background: var(--primary); padding: 8px 12px; color: var(--primary-contrast); white-space: nowrap; }
+.price-stack { display: grid; line-height: 1.1; }
+.product-price { color: var(--price-color); font-weight: 800; font-size: 16px; }
+.product-original { color: var(--muted-text); text-decoration: line-through; font-size: 12px; }
+.discount-badge { background: color-mix(in oklab, var(--primary) 25%, transparent); color: var(--primary); border: 1px solid var(--primary-border-hover); padding: 2px 6px; border-radius: 999px; font-size: 12px; font-weight: 800; }
+.buy-btn { display: none; }
 .buy-btn:hover { border-color: var(--primary-border-hover); }
 
 .modal-overlay {
@@ -263,7 +266,7 @@
   .product-card { grid-template-rows: 120px auto; padding: 8px; }
   .product-info { padding: 8px 4px 2px; }
   .product-name { font-size: 14px; }
-  .product-price { font-size: 14px; }
+  .product-price { font-size: 15px; }
   .buy-btn { padding: 6px 10px; font-size: 13px; }
 
   .pagination { gap: 6px; margin-top: 10px; }

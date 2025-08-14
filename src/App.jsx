@@ -17,6 +17,7 @@ const PRODUCTS = [
     id: 1,
     name: 'iPhone 15 Pro',
     price: 28990000,
+    originalPrice: 32990000,
     category: 'Điện thoại',
     image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=600&auto=format&fit=crop',
     images: [
@@ -30,6 +31,7 @@ const PRODUCTS = [
     id: 2,
     name: 'Samsung Galaxy S23',
     price: 19990000,
+    originalPrice: 24990000,
     category: 'Điện thoại',
     image: 'https://images.unsplash.com/photo-1529612700005-e35377bf1415?q=80&w=600&auto=format&fit=crop'
   },
@@ -37,6 +39,7 @@ const PRODUCTS = [
     id: 3,
     name: 'Xiaomi Redmi 12',
     price: 4990000,
+    originalPrice: 6990000,
     category: 'Điện thoại',
     image: 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?q=80&w=600&auto=format&fit=crop'
   },
@@ -44,6 +47,7 @@ const PRODUCTS = [
     id: 4,
     name: 'OPPO Reno10',
     price: 10990000,
+    originalPrice: 13990000,
     category: 'Điện thoại',
     image: 'https://images.unsplash.com/photo-1512499617640-c74ae6e8b9a1?q=80&w=600&auto=format&fit=crop'
   },
@@ -52,6 +56,7 @@ const PRODUCTS = [
     id: 5,
     name: 'MacBook Air M2 13"',
     price: 26990000,
+    originalPrice: 32990000,
     category: 'Laptop',
     image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=600&auto=format&fit=crop',
     images: [
@@ -66,6 +71,7 @@ const PRODUCTS = [
     id: 6,
     name: 'ASUS TUF Gaming F15',
     price: 18990000,
+    originalPrice: 22990000,
     category: 'Laptop',
     image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=600&auto=format&fit=crop'
   },
@@ -73,6 +79,7 @@ const PRODUCTS = [
     id: 7,
     name: 'Dell XPS 13',
     price: 32990000,
+    originalPrice: 39990000,
     category: 'Laptop',
     image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=600&auto=format&fit=crop'
   },
@@ -80,6 +87,7 @@ const PRODUCTS = [
     id: 8,
     name: 'Lenovo ThinkPad X1 Carbon',
     price: 39990000,
+    originalPrice: 47990000,
     category: 'Laptop',
     image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=600&auto=format&fit=crop'
   },
@@ -88,6 +96,7 @@ const PRODUCTS = [
     id: 9,
     name: 'Tai nghe Bluetooth',
     price: 790000,
+    originalPrice: 1190000,
     category: 'Phụ kiện',
     image: 'https://images.unsplash.com/photo-1517411032315-54ef2cb783bb?q=80&w=600&auto=format&fit=crop',
     images: [
@@ -100,6 +109,7 @@ const PRODUCTS = [
     id: 10,
     name: 'Sạc nhanh 65W',
     price: 490000,
+    originalPrice: 790000,
     category: 'Phụ kiện',
     image: 'https://images.unsplash.com/photo-1588702547923-7093a6c3ba33?q=80&w=600&auto=format&fit=crop'
   },
@@ -107,6 +117,7 @@ const PRODUCTS = [
     id: 11,
     name: 'Chuột không dây',
     price: 350000,
+    originalPrice: 590000,
     category: 'Phụ kiện',
     image: 'https://images.unsplash.com/photo-1585079542156-2755d9c8affd?q=80&w=600&auto=format&fit=crop'
   },
@@ -114,6 +125,7 @@ const PRODUCTS = [
     id: 12,
     name: 'Bàn phím cơ',
     price: 1590000,
+    originalPrice: 2190000,
     category: 'Phụ kiện',
     image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=600&auto=format&fit=crop'
   }
@@ -251,16 +263,15 @@ function App() {
                 <div className="product-info">
                   <div className="product-name">{p.name}</div>
                   <div className="product-meta">
-                    <span className="product-price">{currencyVND(p.price)}</span>
-                    <button
-                      className="buy-btn"
-                       onClick={(e) => {
-                        e.stopPropagation()
-                        openForm(p)
-                      }}
-                    >
-                      Mua ngay
-                    </button>
+                    <div className="price-stack">
+                      <span className="product-price">{currencyVND(p.price)}</span>
+                      {p.originalPrice && p.originalPrice > p.price && (
+                        <span className="product-original">{currencyVND(p.originalPrice)}</span>
+                      )}
+                    </div>
+                    {p.originalPrice && p.originalPrice > p.price && (
+                      <span className="discount-badge">-{Math.round((1 - p.price / p.originalPrice) * 100)}%</span>
+                    )}
                   </div>
                 </div>
               </div>
